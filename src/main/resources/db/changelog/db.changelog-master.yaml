@@ -1,0 +1,38 @@
+databaseChangeLog:
+  - include:
+      file: migrations/V001_create_tables.sql
+      relativeToChangelogFile: true
+  - changeSet:
+      id: 1.5
+      author: ilk07
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: user_id
+            baseTableName: user_roles
+            baseTableSchemaName: public
+            constraintName: fk_user_roles_user
+            onDelete: CASCADE
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: users
+  - changeSet:
+      id: 1.6
+      author: ilk07
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: role_id
+            baseTableName: user_roles
+            baseTableSchemaName: public
+            constraintName: fk_user_roles_roles
+            onDelete: CASCADE
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: roles
+
+
+  - include:
+        file: migrations/V001_insert_roles_into_table_roles.sql
+        relativeToChangelogFile: true
+  - include:
+        file: migrations/V001_insert_demo_user_data_into_table_users.sql
+        relativeToChangelogFile: true

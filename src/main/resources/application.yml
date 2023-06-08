@@ -1,0 +1,51 @@
+app:
+  name: Cloud Storage
+  version: 1.0
+
+files:
+  to-database: true
+  to-folder: true
+  remove-on-delete: true
+  upload-folder: user-files
+  allow-types:
+
+server:
+  port: 8888
+  compression:
+    enabled: true
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/postgres
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 150MB
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+
+  liquibase:
+    enabled: true
+    change-log: classpath:db/changelog/db.changelog-master.yaml
+
+  redis:
+    database: 0
+    host: localhost
+    port: 16379
+    password: redispass
+    timeout: 60000
+
+jwt:
+  token:
+    secret: application-cloud-storage-secure-jwt-auth-secret-word-for-user-authentication-service
+    expired: 3600000
+    header: auth-token
+    bearer: Bearer
+    issuer: Cloud Storage

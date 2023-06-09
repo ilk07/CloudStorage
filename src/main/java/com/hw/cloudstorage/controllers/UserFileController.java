@@ -19,6 +19,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.security.Principal;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/")
@@ -33,8 +34,8 @@ public class UserFileController {
     }
 
     @GetMapping(value = "list")
-    public List<FileEntityNameSizeDto> getUserFilesList(@RequestParam(required = false) int limit, Principal principal) {
-        return fileService.allUserFilesNameSize(getUser(principal), Status.ACTIVE, limit);
+    public List<FileEntityNameSizeDto> getUserFilesList(@RequestParam(required = false) Optional<Integer> limit, Principal principal) {
+        return fileService.allUserFilesNameSize(getUser(principal), Status.ACTIVE, limit.orElse(5));
     }
 
     @GetMapping("file")

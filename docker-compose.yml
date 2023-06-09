@@ -1,0 +1,54 @@
+version: '3'
+services:
+  cloudstorage:
+    image: cloudstorage:latest
+    build:
+      context: .
+    container_name: app-cloud
+    ports:
+      - '8888:8888'
+    depends_on:
+      - db
+      - cache
+    environment:
+      app.name: Cloud Storage #Название приложения
+      app.version: 1.0 #Версия приложения
+      files.to-database: true #Сохранять файлы в базу данных
+      files.to-folder: true #Сохранять файлы в папку
+      files.remove-on-delete: false #Безвозвратно удалять записи и файлы
+      files.upload-folder: user-files #Папка сохранения файлов пользвателей
+      files.allow-types: #типы файлов, доступные для загрузки, если пусто - сохранит любые файлы
+      server.compression.enabled: true
+      spring.jpa.hibernate.ddl-auto: update
+      spring.servlet.multipart.max-file-size: 100MB
+      spring.servlet.multipart.max-request-size: 150MB
+      spring.liquibase.enabled: true
+      spring.liquibase.change-log: classpath:db/changelog/db.changelog-master.yaml
+      jwt.token.secret: application-cloud-storage-secure-jwt-auth-secret-word-for-user-authentication-service #контрольная фраза токена
+      jwt.token.expired: 3600000 #врем дейсвтия ключа (1 час)
+      jwt.token.header: auth-token #заголовок токена
+      jwt.token.bearer: Bearer #предъявитель
+      jwt.token.issuer: Cloud Storage #издатель токена
+      spring_datasource_url: jdbc:postgresql://db:5432/postgres
+      spring_datasource_username: postgres
+      spring_datasource_password: postgres
+      spring_jpa_hibernate_ddl-auto: update
+      spring_redis_database: 0
+      spring_redis_host: cache
+      spring_redis_port: 6379
+      spring_redis_password: redispass
+      spring_redis_timeout: 60000
+
+  db:
+    image: 'postgres'
+    container_name: db
+    ports:
+      - '5432:5432'
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+  cache:
+    image: 'redis'
+    command: redis-server --requirepass redispass
+    ports:
+      - '6379:6379'

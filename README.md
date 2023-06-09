@@ -146,4 +146,24 @@ Liquibase will create all the necessary tables for work and add demo user data.
 |  2  | test@test.com  | password  |
 
 
+### REST service Install (backend)
+
+**Must have to start:**
+- Docker [(docs)](https://www.docker.com) 
+- Maven ([docs](https://www.baeldung.com/install-maven-on-windows-linux-mac))
+- Download or clone current project
+
+**How to install Application**
+
+- Go to folder with this Project on your computer and open Terminal  
+- Create docker image with Application - run this command 
+  - <code>mvn clean package -Dmaven.test.skip=true</code>  
+- Create docker container with Application and Databases - type in terminal
+  - <code>docker-compose up</code>
+
+**That's all! Open Web Application in your browser and start clouding!**  
+
+*Front Web Application [install guide](https://github.com/netology-code/jd-homeworks/tree/master/diploma/netology-diplom-frontend)*
+
+ 
 

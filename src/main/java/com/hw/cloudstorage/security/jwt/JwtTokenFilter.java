@@ -23,10 +23,9 @@ public class JwtTokenFilter extends GenericFilterBean {
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         String token = jwtTokenProvider.resolveToken((HttpServletRequest) servletRequest);
-
         if (token != null && jwtTokenProvider.validateToken(token)) {
             if (jwtTokenProvider.isBlocked(token)) {
-                log.warn("In doFilter JwtTokenProvider possibly stolen blocked token detected : {}", token);
+                log.warn("In doFilter by JwtTokenProvider detected possibly stolen blocked token  : {}", token);
             } else {
                 Authentication authentication = jwtTokenProvider.getAuthentication(token);
                 if (authentication != null) {

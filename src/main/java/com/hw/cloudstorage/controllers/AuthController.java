@@ -49,6 +49,9 @@ public class AuthController {
         } catch (AuthenticationException ae) {
             throw new BadCredentialsException("Invalid login or password");
         }
+    }
 
+    @PostMapping("/logout")
+    public void logout() {
     }
 }

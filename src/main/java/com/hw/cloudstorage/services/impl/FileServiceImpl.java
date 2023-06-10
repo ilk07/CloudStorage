@@ -22,6 +22,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 @Slf4j
 @Service
@@ -76,7 +77,7 @@ public class FileServiceImpl implements FileService {
                 if (fileToDelete.exists()) {
                     File fileFolder = new File(fileToDelete.getParent());
                     FileUtils.deleteQuietly(fileToDelete);
-                    if (fileFolder.isDirectory() && fileFolder.list().length == 0) {
+                    if (fileFolder.isDirectory() && Objects.requireNonNull(fileFolder.list()).length == 0) {
                         FileUtils.deleteQuietly(fileFolder);
                     }
                 }

@@ -8,7 +8,7 @@ import javax.validation.constraints.NotEmpty;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class FileNameUpdateDto {
+public class FileNameDto {
     @NotEmpty(message = "Filename can't be empty")
     private String filename;
 }

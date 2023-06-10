@@ -1,6 +1,7 @@
 package com.hw.cloudstorage.advice;
 
 import com.hw.cloudstorage.exceptions.Error;
+import com.hw.cloudstorage.exceptions.UploadFileToFolderException;
 import com.hw.cloudstorage.model.enums.ErrorType;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
@@ -32,6 +33,11 @@ public class ExceptionHandlerAdvice {
     public ResponseEntity<Error> badCredentialsExceptionHandler(BadCredentialsException e) {
         Error error = new Error(e.getMessage(), ErrorType.LOGIN_CREDENTIALS.getErrorId());
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(UploadFileToFolderException.class)
+    public ResponseEntity<Error> sizeLimitExceededException(UploadFileToFolderException e) {
+        return new ResponseEntity<>(new Error(e.getMessage(), ErrorType.UPLOAD_FILE_TO_FOLDER_ERROR.getErrorId()), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(UsernameNotFoundException.class)
@@ -78,6 +84,5 @@ public class ExceptionHandlerAdvice {
     public ResponseEntity<Error> sizeLimitExceededException(SizeLimitExceededException e) {
         return new ResponseEntity<>(new Error(e.getMessage(), ErrorType.UPLOAD_FILE_SIZE_EXCEEDED.getErrorId()), HttpStatus.UNAUTHORIZED);
     }
-
 
 }

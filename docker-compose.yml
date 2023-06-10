@@ -25,11 +25,11 @@ services:
       spring.liquibase.enabled: true
       spring.liquibase.change-log: classpath:db/changelog/db.changelog-master.yaml
       jwt.token.secret: application-cloud-storage-secure-jwt-auth-secret-word-for-user-authentication-service #контрольная фраза токена
-      jwt.token.expired: 3600000 #врем дейсвтия ключа (1 час)
+      jwt.token.expired: 3600000 #время жизни ключа (1 час)
       jwt.token.header: auth-token #заголовок токена
       jwt.token.bearer: Bearer #предъявитель
       jwt.token.issuer: Cloud Storage #издатель токена
-      spring_datasource_url: jdbc:postgresql://db:5432/postgres
+      spring_datasource_url: jdbc:postgresql://db:5432/cloud_storage
       spring_datasource_username: postgres
       spring_datasource_password: postgres
       spring_jpa_hibernate_ddl-auto: update
@@ -47,6 +47,7 @@ services:
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=cloud_storage
   cache:
     image: 'redis'
     command: redis-server --requirepass redispass

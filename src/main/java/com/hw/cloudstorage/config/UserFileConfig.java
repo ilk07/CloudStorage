@@ -16,7 +16,6 @@ import java.util.Set;
 
 @Getter
 @Setter
-@ToString
 @Configuration
 @ConfigurationProperties("files")
 public class UserFileConfig {

@@ -13,10 +13,7 @@ public class TokenServiceImpl implements TokenService {
 
     @Override
     public boolean isBlocked(String token) {
-        if (blackList.findById(token).isPresent()) {
-            return true;
-        }
-        return false;
+        return blackList.findById(token).isPresent();
     }
 
     @Override

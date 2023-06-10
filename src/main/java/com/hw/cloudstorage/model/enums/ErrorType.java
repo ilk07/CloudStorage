@@ -11,11 +11,12 @@ public enum ErrorType {
     TOKEN_IS_NOT_JWT(108),
     JWT_AUTHENTICATION_INVALID(109),
     INVALID_ARGUMENTS_DATA(110),
-    UPLOAD_FILE_SIZE_EXCEEDED(111);
+    UPLOAD_FILE_SIZE_EXCEEDED(111),
+    UPLOAD_FILE_TO_FOLDER_ERROR(112);
 
     private final int errorId;
 
-    private ErrorType(int errorId) {
+    ErrorType(int errorId) {
         this.errorId = errorId;
     }
 

@@ -70,7 +70,7 @@ The backend application has a preset set of errors
 
 #### List of identifiers for error handling
 
-| ERROR                      | ID |
+| ERROR                      | ID  |
 |----------------------------|-----|
 | LOGIN_CREDENTIALS          | 101 |
 | LOGIN_EMPTY_LOGIN_PASSWORD | 102 | 
@@ -83,6 +83,7 @@ The backend application has a preset set of errors
 | JWT_AUTHENTICATION_INVALID | 109 |
 | INVALID_ARGUMENTS_DATA     | 110 | 
 | UPLOAD_FILE_SIZE_EXCEEDED  | 111 |
+| UPLOAD_FILE_TO_FOLDER_ERROR| 112 |
 
 
 

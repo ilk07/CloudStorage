@@ -1,6 +1,6 @@
 package com.hw.cloudstorage.model.entity;
 
-import com.hw.cloudstorage.dto.FileEntityNameSizeDto;
+import com.hw.cloudstorage.model.FileEntityNameSize;
 import lombok.*;
 import org.hibernate.annotations.Type;
 
@@ -14,13 +14,13 @@ import javax.persistence.*;
 @NoArgsConstructor
 
 @NamedNativeQuery(
-        name = "FileEntity.findUserFileNameSizeDtoByIdAndStatus_Named",
+        name = "FileEntity.findUserFileNameSizeByIdAndStatus_Named",
         query = "SELECT uf.upload_name as filename, uf.size FROM user_files as uf WHERE uf.user_id = :userId and status = :status limit :limit",
-        resultClass = FileEntityNameSizeDto.class,
+        resultClass = FileEntityNameSize.class,
         resultSetMapping = "Mapping.FileEntityNameSizeDto")
 @SqlResultSetMapping(
         name = "Mapping.FileEntityNameSizeDto",
-        classes = @ConstructorResult(targetClass = FileEntityNameSizeDto.class,
+        classes = @ConstructorResult(targetClass = FileEntityNameSize.class,
                 columns = {
                         @ColumnResult(name = "filename", type = String.class),
                         @ColumnResult(name = "size", type = Long.class)

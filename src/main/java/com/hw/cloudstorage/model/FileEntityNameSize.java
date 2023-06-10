@@ -1,14 +1,13 @@
-package com.hw.cloudstorage.dto;
+package com.hw.cloudstorage.model;
 
 import lombok.*;
-
 
 @Getter
 @Setter
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
-public class FileEntityNameSizeDto {
+public class FileEntityNameSize {
     private String filename;
     private Long size;
 }

@@ -9,19 +9,21 @@ import com.hw.cloudstorage.model.FileEntityNameSize;
 import com.hw.cloudstorage.model.entity.FileEntity;
 import com.hw.cloudstorage.model.entity.User;
 import com.hw.cloudstorage.model.enums.Status;
-import com.hw.cloudstorage.services.UserService;
 import com.hw.cloudstorage.services.impl.FileServiceImpl;
+import com.hw.cloudstorage.services.impl.UserServiceImpl;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.Principal;
@@ -30,12 +32,12 @@ import java.util.List;
 @RestController
 @RequestMapping("/")
 public class UserFileController {
-    private final UserService userService;
+    private final UserServiceImpl userService;
     private final FileServiceImpl fileService;
     private final FileEntityDtoBuilder fileEntityDtoBuilder;
 
     @Autowired
-    public UserFileController(FileServiceImpl fileService, UserService userService, FileEntityDtoBuilderImpl fileEntityDtoBuilder) {
+    public UserFileController(FileServiceImpl fileService, UserServiceImpl userService, FileEntityDtoBuilderImpl fileEntityDtoBuilder) {
         this.fileService = fileService;
         this.userService = userService;
         this.fileEntityDtoBuilder = fileEntityDtoBuilder;
@@ -43,14 +45,14 @@ public class UserFileController {
     }
 
     @GetMapping(value = "list")
-    public List<FileEntityNameSize> getUserFilesList(@RequestParam(required = true) int limit, Principal principal) {
-        return fileService.allFilesNameAndSizeByUserAndStatusWithLimit(getUser(principal), Status.ACTIVE, limit);
+    public List<FileEntityNameSize> getUserFilesList(@Valid @RequestParam(name = "limit") int limit, Principal principal) {
+        return fileService.allFilesNameAndSizeByUserAndStatusWithLimit(userService.getUser(principal), Status.ACTIVE, limit);
     }
 
     @GetMapping("file")
-    public ResponseEntity<?> getUserFile(@RequestParam String filename, Principal principal) throws IOException {
+    public ResponseEntity<?> getUserFile(@Valid @RequestParam String filename, Principal principal) throws IOException {
 
-        FileEntity fileEntity = fileService.getByUserIdAndFileNameWithActiveStatus(getUser(principal), filename);
+        FileEntity fileEntity = fileService.getByUserIdAndFileNameWithActiveStatus(userService.getUser(principal), filename);
 
         FileDownloadDto fileDownloadDto = new FileDownloadDto();
 
@@ -74,7 +76,7 @@ public class UserFileController {
     @PostMapping("file")
     public void uploadFile(@Valid @RequestParam String filename, @RequestPart MultipartFile file, Principal principal) throws IOException {
 
-        User user = getUser(principal);
+        User user = userService.getUser(principal);
 
         if (fileService.isDuplicatedFileName(user, filename)) {
             throw new IllegalArgumentException("File with same name has already been uploaded");
@@ -82,7 +84,7 @@ public class UserFileController {
 
         String fileExtension = FilenameUtils.getExtension(filename);
 
-        if(!fileService.isAllowableFileType(fileExtension)){
+        if (!fileService.isAllowableFileType(fileExtension)) {
             throw new IllegalArgumentException("File type is not allowed");
         }
 
@@ -107,19 +109,11 @@ public class UserFileController {
 
     @PutMapping("file")
     public void updateFile(@Valid @RequestParam String filename, @Valid @RequestBody FileNameDto fileNameDto, Principal principal) {
-        fileService.updateFileUploadName(getUser(principal), filename, fileNameDto.getFilename());
+        fileService.updateFileUploadName(userService.getUser(principal), filename, fileNameDto.getFilename());
     }
 
     @DeleteMapping("file")
     public void deleteFile(@Valid @RequestParam String filename, Principal principal) {
-        fileService.deleteFileByUserAndFilename(getUser(principal), filename);
-    }
-
-    public User getUser(Principal principal) {
-        User user = userService.findByUsername(principal.getName());
-        if (user == null) {
-            throw new UsernameNotFoundException("User not found : " + principal.getName());
-        }
-        return user;
+        fileService.deleteFileByUserAndFilename(userService.getUser(principal), filename);
     }
 }

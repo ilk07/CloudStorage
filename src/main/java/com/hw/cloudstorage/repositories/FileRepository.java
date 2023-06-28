@@ -10,13 +10,14 @@ import org.springframework.data.jpa.repository.Query;
 
 import javax.transaction.Transactional;
 import java.util.List;
+import java.util.Optional;
 
 @Transactional
 public interface FileRepository extends JpaRepository<FileEntity, Long> {
 
-    FileEntity findByUserAndUploadNameAndStatus(User user, String uploadName, Status status);
+    Optional<FileEntity> findByUserAndUploadNameAndStatus(User user, String uploadName, Status status);
 
-    int countAllByUserAndUploadNameAndStatus(User user, String uploadName, Status status);
+    long countAllByUserAndUploadNameAndStatus(User user, String uploadName, Status status);
 
     @Query(nativeQuery = true)
     List<FileEntityNameSize> findUserFileNameSizeByIdAndStatus_Named(Long userId, String status, int limit);

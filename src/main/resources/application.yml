@@ -1,11 +1,13 @@
 app:
   name: Cloud Storage
   version: 1.0
+  host: http://localhost
+
 
 files:
   to-database: true
-  to-folder: true
-  remove-on-delete: true
+  to-folder: false
+  remove-on-delete: false
   upload-folder: user-files
   allow-types:
 
@@ -23,6 +25,7 @@ spring:
 
   servlet:
     multipart:
+      enabled: true
       max-file-size: 100MB
       max-request-size: 150MB
 

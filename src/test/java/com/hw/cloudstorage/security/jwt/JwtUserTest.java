@@ -1,11 +1,9 @@
 package com.hw.cloudstorage.security.jwt;
 
-import com.hw.cloudstorage.model.entity.User;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
@@ -19,16 +17,13 @@ class JwtUserTest {
 
     private JwtUser sut;
 
-    private final static Long ID = 1l;
+    private final static Long ID = 1L;
     private final static String USERNAME = "userName";
     private final static String PASSWORD = "password";
     private final static String EMAIL = "mail@mail";
     private final static boolean ENABLED = true;
     private final static Date LASTPASSWORDRESETDATE = now();
     private final static String TEST_ROLE = "ROLE_TEST";
-
-    @Mock
-    User user;
 
     @BeforeAll
     public static void startClassTest() {
@@ -42,9 +37,9 @@ class JwtUserTest {
 
     @BeforeEach
     void initOneTest() {
-        Set<GrantedAuthority> setAuths = new HashSet<GrantedAuthority>();
+        Set<GrantedAuthority> setAuths = new HashSet<>();
         setAuths.add(new SimpleGrantedAuthority(TEST_ROLE));
-        List<GrantedAuthority> resultAuthoritiesList = new ArrayList<GrantedAuthority>(setAuths);
+        List<GrantedAuthority> resultAuthoritiesList = new ArrayList<>(setAuths);
 
         sut = new JwtUser(ID, USERNAME, EMAIL, PASSWORD, resultAuthoritiesList, ENABLED, LASTPASSWORDRESETDATE);
     }

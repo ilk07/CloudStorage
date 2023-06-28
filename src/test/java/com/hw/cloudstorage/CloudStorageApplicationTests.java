@@ -69,13 +69,13 @@ class CloudStorageApplicationTests {
     private final static int DB_PORT = 5432;
 
     @Container
-    private static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:latest")
+    private static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:latest")
             .withExposedPorts(DB_PORT)
             .waitingFor(Wait.forLogMessage("database system is ready to accept connections", 1))
             .waitingFor(Wait.forListeningPort());
 
     @Container
-    private static RedisContainer redis =
+    private static final RedisContainer redis =
             new RedisContainer(DockerImageName.parse("redis:6.0"))
                     .withEnv("requirepass", REDIS_PASS)
                     .withExposedPorts(REDIS_PORT)
@@ -142,9 +142,6 @@ class CloudStorageApplicationTests {
     @Test
     void endPointLogin_whenPostCredentials_shouldReturnAuthToken_status200() throws Exception {
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-
         JSONObject requestData = new JSONObject();
         requestData.put("login", DEMO_USER_LOGIN);
         requestData.put("password", DEMO_USER_PASSWORD);
@@ -172,7 +169,7 @@ class CloudStorageApplicationTests {
                 .andExpect(status().is(200));
 
         BlockedToken blockedToken = blacklistTokenRepository.findById(token).orElse(null);
-        assertTrue(blockedToken != null);
+        assertNotNull(blockedToken);
 
     }
 
@@ -252,7 +249,7 @@ class CloudStorageApplicationTests {
                 )
 
                 .andExpect(status().is(200))
-                .andExpect(result -> assertTrue(result.getResponse().getContentAsString().equals(fileToDownload)));
+                .andExpect(result -> assertEquals(fileToDownload, result.getResponse().getContentAsString()));
     }
 
     @Test

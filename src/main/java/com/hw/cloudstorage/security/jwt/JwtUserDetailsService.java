@@ -1,8 +1,6 @@
 package com.hw.cloudstorage.security.jwt;
 
 import com.hw.cloudstorage.model.entity.User;
-import com.hw.cloudstorage.security.jwt.JwtUser;
-import com.hw.cloudstorage.security.jwt.JwtUserFactory;
 import com.hw.cloudstorage.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -21,7 +19,7 @@ public class JwtUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = userService.findByUsername(username);
         if (user == null) {
-            throw new UsernameNotFoundException("User : " + username + " not found");
+            throw new UsernameNotFoundException("User not found: " + username);
         }
         JwtUser jwtUser = JwtUserFactory.create(user);
         return jwtUser;

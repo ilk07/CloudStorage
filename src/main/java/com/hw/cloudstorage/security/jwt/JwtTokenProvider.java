@@ -12,6 +12,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -78,8 +79,12 @@ public class JwtTokenProvider {
     }
 
     public Authentication getAuthentication(String token) {
-        UserDetails userDetails = this.userDetailsService.loadUserByUsername(getUsername(token));
-        return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
+        try {
+            UserDetails userDetails = this.userDetailsService.loadUserByUsername(getUsername(token));
+            return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
+        } catch (UsernameNotFoundException exception){
+            throw exception;
+        }
     }
 
     public String getUsername(String token) {
@@ -93,13 +98,13 @@ public class JwtTokenProvider {
     }
 
     public boolean validateToken(String token) {
+
         try {
             return !parseClaimsJwsToken(token).getBody().getExpiration().before(new Date());
-
         } catch (ExpiredJwtException | MalformedJwtException | UnsupportedJwtException jwtEx) {
-            log.warn("In JwtTokenProvider validateToken threw exception {}", jwtEx.getMessage());
+            log.warn("In JwtTokenProvider validateToken threw Jwt Exception {}. {}", jwtEx.getMessage(), jwtEx.getClass());
         } catch (Exception ex) {
-            log.error("In JwtTokenProvider validateToken threw Exception {}", ex.getMessage());
+            log.error("In JwtTokenProvider validateToken threw Exception {}. {}", ex.getMessage(), ex.getClass());
         }
 
         return false;
@@ -118,11 +123,13 @@ public class JwtTokenProvider {
 
     public void tokenToBlackList(HttpServletRequest request) {
         String token = resolveToken(request);
-        Date expiration = parseClaimsJwsToken(token).getBody().getExpiration();
-        Date now = new Date();
-        Long expirationTimeInSeconds = expiration.getTime() - now.getTime();
-        if (expirationTimeInSeconds > 0) {
-            tokenService.save(new BlockedToken(token, expirationTimeInSeconds));
+        if (validateToken(token) && !isBlocked(token)) {
+            Date expiration = parseClaimsJwsToken(token).getBody().getExpiration();
+            Date now = new Date();
+            Long expirationTimeInSeconds = expiration.getTime() - now.getTime();
+            if (expirationTimeInSeconds > 0) {
+                tokenService.save(new BlockedToken(token, expirationTimeInSeconds));
+            }
         }
     }
 

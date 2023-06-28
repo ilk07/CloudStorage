@@ -11,15 +11,16 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
 
 @RestController
 @RequestMapping("/")
-@CrossOrigin("http://localhost:8080")
 public class AuthController {
-
     private final UserService userService;
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider jwtTokenProvider;
@@ -35,20 +36,22 @@ public class AuthController {
     public AuthenticationToken getAuthToken(@Valid @RequestBody LoginCredentials loginCredentials) {
 
         try {
-            authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(loginCredentials.getLogin(), loginCredentials.getPassword())
-            );
-            User user = userService.findByUsername(loginCredentials.getLogin());
-            if (user == null) {
-                throw new UsernameNotFoundException("User not found");
-            }
-            String token = jwtTokenProvider.createToken(user);
-
-            return new AuthenticationToken(token);
+            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginCredentials.getLogin(), loginCredentials.getPassword()));
 
         } catch (AuthenticationException ae) {
             throw new BadCredentialsException("Invalid login or password");
         }
+
+        User user = userService.findByUsername(loginCredentials.getLogin());
+
+        if (user == null) {
+            throw new UsernameNotFoundException("User not found");
+        }
+
+        String token = jwtTokenProvider.createToken(user);
+
+        return new AuthenticationToken(token);
+
     }
 
     @PostMapping("/logout")

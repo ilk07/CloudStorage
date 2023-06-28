@@ -17,7 +17,7 @@ public class TokenServiceImpl implements TokenService {
     }
 
     @Override
-    public void save(BlockedToken blockedToken) {
-        blackList.save(blockedToken);
+    public BlockedToken save(BlockedToken blockedToken) {
+        return blackList.save(blockedToken);
     }
 }

@@ -124,7 +124,7 @@ class ExceptionHandlerAdviceTest {
                 .andExpect(result -> assertTrue(result.getResolvedException() instanceof BadCredentialsException))
                 .andExpect(result -> assertTrue(result.getResponse().getContentAsString().contains("id")))
                 .andExpect(result -> assertTrue(result.getResponse().getContentAsString().contains("message")))
-                .andExpect(result -> assertTrue((result.getResponse().getContentAsString().contains("103"))));
+                .andExpect(result -> assertTrue((result.getResponse().getContentAsString().contains("101"))));
     }
 
     @Test

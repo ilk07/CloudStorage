@@ -64,13 +64,13 @@ class CloudStorageApplicationUploadToFolderTests {
 
 
     @Container
-    private static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:latest")
+    private static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:latest")
             .withExposedPorts(DB_PORT)
             .waitingFor(Wait.forLogMessage("database system is ready to accept connections", 1))
             .waitingFor(Wait.forListeningPort());
 
     @Container
-    private static RedisContainer redis =
+    private static final RedisContainer redis =
             new RedisContainer(DockerImageName.parse("redis:6.0"))
                     .withEnv("requirepass", REDIS_PASS)
                     .withExposedPorts(REDIS_PORT)

@@ -43,7 +43,7 @@ public class ExceptionHandlerAdvice extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(SizeLimitExceededException.class)
     public ResponseEntity<Error> sizeLimitExceededExceptionHandler(SizeLimitExceededException e) {
-        return new ResponseEntity<>(new Error("File size exceeded", ErrorType.UPLOAD_FILE_SIZE_EXCEEDED.getErrorId()), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(new Error("File size exceeded " + e.getMessage(), ErrorType.UPLOAD_FILE_SIZE_EXCEEDED.getErrorId()), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)

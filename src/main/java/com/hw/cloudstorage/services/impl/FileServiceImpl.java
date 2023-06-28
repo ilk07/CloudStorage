@@ -8,7 +8,6 @@ import com.hw.cloudstorage.model.entity.User;
 import com.hw.cloudstorage.model.enums.Status;
 import com.hw.cloudstorage.repositories.FileRepository;
 import com.hw.cloudstorage.services.FileService;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.Modifying;
@@ -20,11 +19,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
-@Slf4j
 @Service
 public class FileServiceImpl implements FileService {
 
@@ -39,27 +35,12 @@ public class FileServiceImpl implements FileService {
 
     @Override
     public void uploadFile(FileEntity fileEntity, User user) {
-
         if (config.isToFolder()) {
-            try {
-
-                Path uploadDir = generateFilePathForUserUploadFile(user);
-                Path uploadFilePath = uploadDir.resolve(fileEntity.getName());
-                String fullFilePath = uploadFilePath.toString();
-                FileUtils.writeByteArrayToFile(new File(fullFilePath), fileEntity.getBytes());
-                fileEntity.setFileFolder(fullFilePath);
-
-            } catch (IOException e) {
-                log.error("In uploadUserFile FileUtils on writeByteArrayToFile threw IOException {}", e.getMessage());
-                throw new UploadFileToFolderException("File upload to folder failed");
-            }
-
+            fileEntity = fileToFolder(fileEntity, user);
             if (!config.isToDatabase()) {
                 fileEntity.setBytes(null);
             }
-
         }
-
         save(fileEntity);
     }
 
@@ -72,16 +53,7 @@ public class FileServiceImpl implements FileService {
         FileEntity fileEntity = getByUserIdAndFileNameWithActiveStatus(user, filename);
 
         if (config.isRemoveOnDelete()) {
-            if (fileEntity.getFileFolder() != null) {
-                File fileToDelete = FileUtils.getFile(fileEntity.getFileFolder());
-                if (fileToDelete.exists()) {
-                    File fileFolder = new File(fileToDelete.getParent());
-                    FileUtils.deleteQuietly(fileToDelete);
-                    if (fileFolder.isDirectory() && Objects.requireNonNull(fileFolder.list()).length == 0) {
-                        FileUtils.deleteQuietly(fileFolder);
-                    }
-                }
-            }
+            unlinkFile(fileEntity);
             storage.delete(fileEntity);
         } else {
             fileEntity.setStatus(Status.DELETED);
@@ -103,8 +75,8 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public void save(FileEntity fileEntity) {
-        storage.save(fileEntity);
+    public FileEntity save(FileEntity fileEntity) {
+        return storage.save(fileEntity);
     }
 
     public boolean isDuplicatedFileName(User user, String fileName) {
@@ -112,14 +84,12 @@ public class FileServiceImpl implements FileService {
     }
 
     public FileEntity getByUserIdAndFileNameWithActiveStatus(User user, String filename) {
-        FileEntity fileEntity = storage.findByUserAndUploadNameAndStatus(user, filename, Status.ACTIVE);
-
-        if (fileEntity == null) {
-            throw new IllegalArgumentException("File " + filename + " not found");
+        Optional<FileEntity> fileEntity = storage.findByUserAndUploadNameAndStatus(user, filename, Status.ACTIVE);
+        if (fileEntity.isPresent()) {
+            return fileEntity.get();
         }
 
-        return fileEntity;
-
+        throw new IllegalArgumentException("File " + filename + " not found");
     }
 
 
@@ -128,12 +98,39 @@ public class FileServiceImpl implements FileService {
     }
 
     public String generateUniqueFileName() {
+
         Date dNow = new Date();
         SimpleDateFormat ft = new SimpleDateFormat("yyMMddhhmmssMs");
-        return ft.format(dNow);
+        return UUID.randomUUID() + "-" +ft.format(dNow);
     }
 
     public Path generateFilePathForUserUploadFile(User user) {
         return Paths.get(config.getUploadFolder() + "/" + user.getId() + "/" + LocalDate.now());
+    }
+
+    public void unlinkFile(FileEntity fileEntity){
+        if (fileEntity.getFileFolder() != null) {
+            File fileToDelete = FileUtils.getFile(fileEntity.getFileFolder());
+            if (fileToDelete.exists()) {
+                File fileFolder = new File(fileToDelete.getParent());
+                FileUtils.deleteQuietly(fileToDelete);
+                if (fileFolder.isDirectory() && Objects.requireNonNull(fileFolder.list()).length == 0) {
+                    FileUtils.deleteQuietly(fileFolder);
+                }
+            }
+        }
+    }
+
+    public FileEntity fileToFolder(FileEntity fileEntity, User user) {
+        try {
+            Path uploadDir = generateFilePathForUserUploadFile(user);
+            Path uploadFilePath = uploadDir.resolve(fileEntity.getName());
+            String fullFilePath = uploadFilePath.toString();
+            FileUtils.writeByteArrayToFile(new File(fullFilePath), fileEntity.getBytes());
+            fileEntity.setFileFolder(fullFilePath);
+        }  catch (IOException e) {
+            throw new UploadFileToFolderException("File upload to folder failed");
+        }
+        return fileEntity;
     }
 }

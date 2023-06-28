@@ -3,28 +3,29 @@ package com.hw.cloudstorage.advice;
 import com.hw.cloudstorage.exceptions.Error;
 import com.hw.cloudstorage.exceptions.UploadFileToFolderException;
 import com.hw.cloudstorage.model.enums.ErrorType;
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.MalformedJwtException;
-import io.jsonwebtoken.UnsupportedJwtException;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.tomcat.util.http.fileupload.impl.SizeLimitExceededException;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 @RestControllerAdvice
-public class ExceptionHandlerAdvice {
+public class ExceptionHandlerAdvice extends ResponseEntityExceptionHandler {
     @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<Error> illegalArgumentException(IllegalArgumentException e) {
+    public ResponseEntity<Error> illegalArgumentExceptionHandler(IllegalArgumentException e) {
         Error error = new Error(e.getMessage(), ErrorType.INVALID_ARGUMENTS_DATA.getErrorId());
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
@@ -36,53 +37,37 @@ public class ExceptionHandlerAdvice {
     }
 
     @ExceptionHandler(UploadFileToFolderException.class)
-    public ResponseEntity<Error> sizeLimitExceededException(UploadFileToFolderException e) {
+    public ResponseEntity<Error> uploadFileToFolderExceptionHandler(UploadFileToFolderException e) {
         return new ResponseEntity<>(new Error(e.getMessage(), ErrorType.UPLOAD_FILE_TO_FOLDER_ERROR.getErrorId()), HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(UsernameNotFoundException.class)
-    public ResponseEntity<Error> usernameNotFoundException(UsernameNotFoundException e) {
-        return new ResponseEntity<>(new Error(e.getMessage(), ErrorType.LOGIN_CREDENTIALS.getErrorId()), HttpStatus.UNAUTHORIZED);
+    @ExceptionHandler(SizeLimitExceededException.class)
+    public ResponseEntity<Error> sizeLimitExceededExceptionHandler(SizeLimitExceededException e) {
+        return new ResponseEntity<>(new Error("File size exceeded", ErrorType.UPLOAD_FILE_SIZE_EXCEEDED.getErrorId()), HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Error> methodArgumentNotValidExceptionHandler(MethodArgumentNotValidException e) {
-        List<String> errors = new ArrayList<>();
-        for (FieldError error : e.getFieldErrors()) {
-            errors.add(error.getDefaultMessage());
-        }
-        Error error = new Error(errors.toString(), ErrorType.LOGIN_EMPTY_LOGIN_PASSWORD.getErrorId());
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<Error> methodArgumentTypeMismatchException(MethodArgumentTypeMismatchException e) {
+        String message = "Invalid argument for parameter "+ e.getName();
+        return new ResponseEntity<>(new Error(message, ErrorType.INVALID_ARGUMENTS_DATA.getErrorId()), HttpStatus.BAD_REQUEST);
+    }
+
+
+    @Override
+    protected ResponseEntity<Object> handleMissingServletRequestParameter(MissingServletRequestParameterException missingServletRequestParameterException, HttpHeaders headers, HttpStatus status, WebRequest request) {
+        Error error = new Error(missingServletRequestParameterException.getMessage(), ErrorType.INVALID_ARGUMENTS_DATA.getErrorId());
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler
-    public ResponseEntity<Error> handleAccessDeniedException(AccessDeniedException e) {
-        return new ResponseEntity<>(new Error(e.getMessage(), ErrorType.JWT_AUTHENTICATION_INVALID.getErrorId()), HttpStatus.UNAUTHORIZED);
-    }
+    @Override
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException methodArgumentNotValidException, HttpHeaders headers, HttpStatus status, WebRequest request) {
 
-    @ExceptionHandler(ExpiredJwtException.class)
-    public ResponseEntity<Error> expiredJwtExceptionHandler(ExpiredJwtException e) {
-        return new ResponseEntity<>(new Error(e.getMessage(), ErrorType.TOKEN_EXPIRED.getErrorId()), HttpStatus.UNAUTHORIZED);
-    }
+        List<String> errors = new ArrayList<>();
+        for (FieldError error : methodArgumentNotValidException.getFieldErrors()) {
+            errors.add(error.getDefaultMessage());
+        }
 
-    @ExceptionHandler(UnsupportedJwtException.class)
-    public ResponseEntity<Error> unsupportedJwtExceptionHandler(UnsupportedJwtException e) {
-        return new ResponseEntity<>(new Error(e.getMessage(), ErrorType.UNSUPPORTED_TOKEN.getErrorId()), HttpStatus.UNAUTHORIZED);
+        Error error = new Error(String.join(",", errors), ErrorType.INVALID_ARGUMENTS_DATA.getErrorId());
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
-
-    @ExceptionHandler(MalformedJwtException.class)
-    public ResponseEntity<Error> malformedJwtExceptionHandler(MalformedJwtException e) {
-        return new ResponseEntity<>(new Error(e.getMessage(), ErrorType.TOKEN_IS_NOT_JWT.getErrorId()), HttpStatus.UNAUTHORIZED);
-    }
-
-    @ExceptionHandler(AuthenticationException.class)
-    public ResponseEntity<Error> handleAuthenticationException(Exception e) {
-        return new ResponseEntity<>(new Error(e.getMessage(), ErrorType.JWT_AUTHENTICATION_INVALID.getErrorId()), HttpStatus.UNAUTHORIZED);
-    }
-
-    @ExceptionHandler(SizeLimitExceededException.class)
-    public ResponseEntity<Error> sizeLimitExceededException(SizeLimitExceededException e) {
-        return new ResponseEntity<>(new Error(e.getMessage(), ErrorType.UPLOAD_FILE_SIZE_EXCEEDED.getErrorId()), HttpStatus.UNAUTHORIZED);
-    }
-
 }

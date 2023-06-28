@@ -10,7 +10,7 @@ import java.io.FileNotFoundException;
 import java.util.List;
 
 public interface FileService {
-    void save(FileEntity fileEntity);
+    FileEntity save(FileEntity fileEntity);
 
     void uploadFile(FileEntity fileEntity, User user);
 

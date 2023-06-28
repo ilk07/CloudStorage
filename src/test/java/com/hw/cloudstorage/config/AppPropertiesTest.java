@@ -2,8 +2,6 @@ package com.hw.cloudstorage.config;
 
 import org.junit.jupiter.api.*;
 
-import java.net.MalformedURLException;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 

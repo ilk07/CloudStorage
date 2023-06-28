@@ -11,7 +11,7 @@ import javax.annotation.PreDestroy;
 @TestConfiguration
 public class TestRedisConfiguration {
 
-    private RedisServer redisServer;
+    private final RedisServer redisServer;
 
     public TestRedisConfiguration(RedisProperties redisProperties) {
         RedisServer redisServer = RedisServer.builder()

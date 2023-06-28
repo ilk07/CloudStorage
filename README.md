@@ -13,10 +13,45 @@ A web application (FRONT) is connected to the developed service and provides a U
 ## User authorization
 The FRONT application uses the auth-token header, in which it sends a token (key-string) to identify the user on the BACKEND. To get a token, you need to go through authorization on BACKEND and send login and password to the /login method. In case of successful validation, the BACKEND response should return a json object with the auth-token field and the value of the token. All further requests from FRONTEND, except for the /login method, are sent with this header. To exit the application, you need to call the BACKEND /logout method, which will delete / deactivate the token. Subsequent requests with this token will be unauthorized and will return a 401 unauthorized code.
 
-**JWT Token**  
+## JWT Token  
 The REST service (backend) uses a JWT token for authorization and checks the rights and validity of the token on each request of the Web application, except for the login endpoint
 
-#### Available JWT settings
+
+### Jwt token example  
+
+**Encoded Token**
+```eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0QHRlc3QuY29tIiwidXNlcm5hbWUiOiJ0ZXN0QHRlc3QuY29tIiwicm9sZXMiOlsiUk9MRV9VU0VSIl0sImlhdCI6MTY4NzE3MDM4OSwiZXhwIjoxNjg3MTczOTg5fQ.KR4XBPWx1XhcuCSMqXs6z-RX_AR-8hdhVXJ-KHT0Y1Q```
+
+**Decoded Token**
+
+HEADER  
+```
+{
+  "alg": "HS256"
+}
+```
+
+PAYLOAD  
+```
+{  
+  "sub": "test@test.com",
+  "username": "test@test.com",
+  "roles": [
+    "ROLE_USER"
+  ],
+  "iat": 1687170389,
+  "exp": 1687173989
+}
+```
+VERIFY SIGNATURE
+```
+HMACSHA256(
+  base64UrlEncode(header) + "." +
+  base64UrlEncode(payload),
+  secret
+)
+```   
+### Available JWT settings
 
 | setting | description                           | default value                                                                         |
 |---------|---------------------------------------|---------------------------------------------------------------------------------------|
@@ -98,6 +133,7 @@ The backend application has a preset set of errors
 #### Databases
 - Postgresql to securely store users and users files. *The better solution for production would be to add an authorization server)*
 - Redis for quick validation of authorization tokens and storage of redeemed tokens after logout *(fast and simple - in-memory blacklist )**
+- Embedded Redis Server and H2 (Java SQL database) for REST interface testing
 
 ### Authorization steps using the Blacklist (principles and logic)
 Login
@@ -147,6 +183,34 @@ Liquibase will create all the necessary tables for work and add demo user data.
 |  2  | test@test.com  | password  |
 
 
+### REST service built-in tests
+Backend classes are 100% covered by tests, 93% of lines of code are under tests.
+When testing applications, PostgreSQL and Redis are replaced by a built-in Redis server and H2 database, that is, databases in production are free.
+
+For Unit tests with real dependencies we use [Testcontainers](https://testcontainers.com). This ensures that all application components work correctly together.
+Testcontainers technology allows us to run the application environment 
+(Redis and PostgreSQL) to test the application with real dependencies - see test classes
+*CloudStorageApplicationTests, CloudStorageApplicationUploadToFolderTests*.  
+It is important, that these classes use different settings, changing them will require adjustments to the tests.
+
+**CloudStorageApplicationTests class**
+
+| files setting | value |
+|:--------------|:------|
+| to-database| true  |
+| to-folder | false |
+| remove-on-delete | false |
+
+**CloudStorageApplicationUploadToFolderTests class**
+
+| files setting | value |
+|:--------------|:------|
+| to-database| false  |
+| to-folder | true |
+| remove-on-delete | true |
+
+
+
 ### REST service Install (backend)
 
 **Must have to start:**
@@ -154,17 +218,14 @@ Liquibase will create all the necessary tables for work and add demo user data.
 - Maven ([docs](https://www.baeldung.com/install-maven-on-windows-linux-mac))
 - Download or clone current project
 
-**How to install Application**
+**How to install**
 
 - Go to folder with this Project on your computer and open Terminal  
-- Create docker image with Application - run this command 
-  - <code>mvn clean package -Dmaven.test.skip=true</code>  
+- Create docker image with Application - run command 
+  - <code>mvn clean package</code> or <code>mvn clean package -Dmaven.test.skip=true</code> to skip tests  
 - Create docker container with Application and Databases - type in terminal
   - <code>docker-compose up</code>
 
 **That's all! Open Web Application in your browser and start clouding!**  
 
 *Front Web Application [install guide](https://github.com/netology-code/jd-homeworks/tree/master/diploma/netology-diplom-frontend)*
-
- 
-

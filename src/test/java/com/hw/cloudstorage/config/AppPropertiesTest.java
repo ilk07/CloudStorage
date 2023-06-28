@@ -26,7 +26,7 @@ class AppPropertiesTest {
 
 
     @BeforeEach
-    void setUp() throws MalformedURLException {
+    void setUp() {
         sut = new AppProperties();
         sut.setName("App Test name");
         sut.setVersion("Test version");
